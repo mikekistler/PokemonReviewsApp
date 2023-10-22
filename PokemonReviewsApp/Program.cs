@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PokemonReviewsApp;
 using PokemonReviewsApp.Data;
 using PokemonReviewsApp.Interfaces;
+using PokemonReviewsApp.Mapper;
 using PokemonReviewsApp.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
