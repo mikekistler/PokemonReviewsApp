@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PokemonReviewsApp.Dto;
 using PokemonReviewsApp.Interfaces;
-using PokemonReviewsApp.Mapper;
 using PokemonReviewsApp.Models;
 
 namespace PokemonReviewsApp.Controllers
@@ -14,13 +13,10 @@ namespace PokemonReviewsApp.Controllers
         private readonly IPokemonRepository pokemonRepository;
         private readonly IMapper mapper;
 
-        public PokemonController(IPokemonRepository repository)
+        public PokemonController(IPokemonRepository repository, IMapper mapper)
         {
             pokemonRepository = repository;
-            var config = new MapperConfiguration(cfg => {
-                cfg.AddProfile<MappingProfiles>();
-            });
-            mapper = config.CreateMapper();
+            this.mapper = mapper;
         }
 
         [HttpGet]
