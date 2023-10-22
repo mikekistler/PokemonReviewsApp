@@ -20,6 +20,18 @@ namespace PokemonReviewsApp.Repository
             return dataContext.Countries.Any(c => c.Id == id);
         }
 
+        public bool CreateCountry(Country country)
+        {
+            dataContext.Add(country);
+            return Save();
+        }
+
+        private bool Save()
+        {
+            var saved = dataContext.SaveChanges();
+            return saved > 0 ? true : false;
+        }
+
         public Country GetCountry(int id)
         {
             return dataContext.Countries.Where(c => c.Id == id).FirstOrDefault();

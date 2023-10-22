@@ -18,6 +18,18 @@ namespace PokemonReviewsApp.Repository
             return dataContext.Categories.Any(c => c.Id == id);
         }
 
+        public bool CreateCategory(Category category)
+        {
+            dataContext.Add(category);
+            return Save();
+        }
+
+        private bool Save()
+        {
+            var saved = dataContext.SaveChanges();
+            return saved > 0 ? true : false;
+        }
+
         public Category GetCategory(int id)
         {
             return dataContext.Categories.Where(c => c.Id == id).FirstOrDefault();

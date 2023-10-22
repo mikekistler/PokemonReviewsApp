@@ -31,7 +31,7 @@ namespace PokemonReviewsApp.Controllers
             return Ok(mapper.Map<ICollection<CountryDto>>(countries));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetCountry")]
         [ProducesResponseType(200, Type = typeof(Country))]
         [ProducesResponseType(400)]
         public IActionResult GetCountry(int id)
@@ -61,6 +61,39 @@ namespace PokemonReviewsApp.Controllers
                 return BadRequest(ModelState);
 
             return Ok(mapper.Map<CountryDto>(country));
+        }
+
+        [HttpPost]
+        [ProducesResponseType(201, Type = typeof(Country))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
+        public IActionResult CreateCountry([FromBody]CountryDto countryToCreate)
+        {
+            if (countryToCreate == null)
+                return BadRequest(ModelState);
+
+            var country = countryRepository.ListCountries()
+                .Where(c => c.Name.Trim().ToUpper() == countryToCreate.Name.Trim().ToUpper())
+                .FirstOrDefault();
+
+            if (country != null)
+            {
+                ModelState.AddModelError("", $"Country {countryToCreate.Name} already exists.");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            country = mapper.Map<Country>(countryToCreate);
+
+            if (!countryRepository.CreateCountry(country))
+            {
+                ModelState.AddModelError("", $"Something went wrong saving the country {country.Name}.");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetCountry", new { id = country.Id }, mapper.Map<CountryDto>(country));
         }
     }
 }

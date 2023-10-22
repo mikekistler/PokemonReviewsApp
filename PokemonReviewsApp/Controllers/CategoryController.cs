@@ -31,7 +31,7 @@ namespace PokemonReviewsApp.Controllers
             return Ok(mapper.Map<ICollection<CategoryDto>>(categories));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetCategory")]
         [ProducesResponseType(200, Type = typeof(Category))]
         [ProducesResponseType(400)]
         public IActionResult GetCategory(int id)
@@ -62,5 +62,37 @@ namespace PokemonReviewsApp.Controllers
 
             return Ok(mapper.Map<ICollection<PokemonDto>>(pokemon));
         }
+
+        [HttpPost]
+        [ProducesResponseType(201, Type = typeof(Category))]
+        [ProducesResponseType(400)]
+        public IActionResult CreateCategory([FromBody] CategoryDto categoryCreate)
+        {
+            if (categoryCreate == null)
+                return BadRequest(ModelState);
+
+            var category = categoryRepository.ListCategories()
+                .Where(c => c.Name.Trim().ToLower() == categoryCreate.Name.Trim().ToLower())
+                .FirstOrDefault();
+
+            if (category != null)
+            {
+                ModelState.AddModelError("", $"Category {categoryCreate.Name} already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            category = mapper.Map<Category>(categoryCreate);
+
+            if (!categoryRepository.CreateCategory(category))
+            {
+                ModelState.AddModelError("", $"Something went wrong saving the category {category.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetCategory", new { id = category.Id }, mapper.Map<CategoryDto>(category));
+        }   
     }
 }

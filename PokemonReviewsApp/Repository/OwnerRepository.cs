@@ -14,6 +14,18 @@ namespace PokemonReviewsApp.Repository
             dataContext = context;
         }
 
+        public bool CreateOwner(Owner owner)
+        {
+            dataContext.Add(owner);
+            return Save();
+        }
+
+        private bool Save()
+        {
+            var saved = dataContext.SaveChanges();
+            return saved > 0 ? true : false;
+        }
+
         public Owner GetOwner(int id)
         {
             return dataContext.Owners.Where(o => o.Id == id).FirstOrDefault();
