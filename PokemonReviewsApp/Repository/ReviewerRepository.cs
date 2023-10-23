@@ -32,5 +32,17 @@ namespace PokemonReviewsApp.Repository
         {
             return dataContext.Reviewers.Any(r => r.Id == id);
         }
+
+        public bool CreateReviewer(Reviewer reviewer)
+        {
+            dataContext.Add(reviewer);
+            return Save();
+        }
+
+        private bool Save()
+        {
+            var saved = dataContext.SaveChanges();
+            return saved > 0 ? true : false;
+        }
     }
 }

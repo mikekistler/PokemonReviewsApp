@@ -31,7 +31,7 @@ namespace PokemonReviewsApp.Controllers
             return Ok(mapper.Map<ICollection<ReviewDto>>(reviews));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetReview")]
         [ProducesResponseType(200, Type = typeof(Review))]
         [ProducesResponseType(400)]
         public IActionResult GetReview(int id)
@@ -58,6 +58,34 @@ namespace PokemonReviewsApp.Controllers
                 return BadRequest(ModelState);
 
             return Ok(mapper.Map<ICollection<ReviewDto>>(reviews));
+        }
+
+        [HttpPost]
+        [ProducesResponseType(201, Type = typeof(Review))]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReview([FromQuery] int reviewerId, [FromQuery] int pokemonId, [FromBody] ReviewDto reviewToCreate)
+        {
+            if (reviewToCreate == null)
+                return BadRequest(ModelState);
+
+            if (reviewRepository.ReviewExists(reviewerId, pokemonId))
+            {
+                ModelState.AddModelError("", $"Review by reviewer {reviewerId} for Pokemon {pokemonId} already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var review = mapper.Map<Review>(reviewToCreate);
+
+            if (!reviewRepository.CreateReview(reviewerId, pokemonId, review))
+            {
+                ModelState.AddModelError("", $"Something went wrong saving the review");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetReview", new { id = review.Id }, mapper.Map<ReviewDto>(review));
         }
     }
 }

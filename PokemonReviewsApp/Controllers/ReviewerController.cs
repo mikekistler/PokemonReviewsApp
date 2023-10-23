@@ -31,7 +31,7 @@ namespace PokemonReviewsApp.Controllers
             return Ok(mapper.Map<ICollection<ReviewerDto>>(reviewers));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetReviewer")]
         [ProducesResponseType(200, Type = typeof(Reviewer))]
         [ProducesResponseType(400)]
         public IActionResult GetReviewer(int id)
@@ -61,6 +61,39 @@ namespace PokemonReviewsApp.Controllers
                 return BadRequest(ModelState);
 
             return Ok(mapper.Map<ICollection<ReviewDto>>(reviews));
+        }
+
+        [HttpPost]
+        [ProducesResponseType(201, Type = typeof(Reviewer))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult CreateReviewer([FromBody] ReviewerDto reviewerCreate)
+        {
+            if (reviewerCreate == null)
+                return BadRequest(ModelState);
+
+            var reviewer = reviewerRepository.ListReviewers()
+                .FirstOrDefault(r => r.FirstName.Equals(reviewerCreate.FirstName) && r.LastName.Equals(reviewerCreate.LastName));
+
+            if (reviewer != null)
+            {
+                ModelState.AddModelError("", $"Reviewer {reviewerCreate.FirstName} {reviewerCreate.LastName} already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            reviewer = mapper.Map<Reviewer>(reviewerCreate);
+
+            if (!reviewerRepository.CreateReviewer(reviewer))
+            {
+                ModelState.AddModelError("", $"Something went wrong saving the reviewer " +
+                                       $"{reviewer.FirstName} {reviewer.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetReviewer", new { id = reviewer.Id }, mapper.Map<ReviewerDto>(reviewer));
         }
     }
 }

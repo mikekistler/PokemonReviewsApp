@@ -112,7 +112,7 @@ namespace PokemonReviewsApp.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return CreatedAtRoute("GetOwner", new { id = ownerToCreate.Id }, ownerToCreate);
+            return CreatedAtRoute("GetOwner", new { id = owner.Id }, mapper.Map<OwnerDto>(owner));
         }
     }
 }

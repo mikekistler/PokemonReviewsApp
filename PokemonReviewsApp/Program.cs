@@ -4,6 +4,7 @@ using PokemonReviewsApp.Data;
 using PokemonReviewsApp.Interfaces;
 using PokemonReviewsApp.Mapper;
 using PokemonReviewsApp.Repository;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,10 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+// Ignore cycles in JSON serialization
+builder.Services.AddControllers().AddJsonOptions(options =>
+   options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
