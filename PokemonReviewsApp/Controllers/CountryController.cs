@@ -95,5 +95,37 @@ namespace PokemonReviewsApp.Controllers
 
             return CreatedAtRoute("GetCountry", new { id = country.Id }, mapper.Map<CountryDto>(country));
         }
+
+        [HttpPatch("{id}")]
+        [Consumes("application/merge-patch+json")]
+        [ProducesResponseType(200, Type = typeof(Country))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateCountry(int id, [FromBody]CountryDto countryToUpdate)
+        {
+            if (countryToUpdate == null)
+                return BadRequest(ModelState);
+
+            if (countryToUpdate.Id == null)
+                countryToUpdate.Id = id;
+            else if (countryToUpdate.Id != id)
+                return BadRequest(ModelState);
+
+            if (!countryRepository.CountryExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var country = mapper.Map<Country>(countryToUpdate);
+
+            if (!countryRepository.UpdateCountry(country))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating the country {country.Name}.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(mapper.Map<CountryDto>(country));
+        }
     }
 }

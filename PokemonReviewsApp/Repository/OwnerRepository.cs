@@ -50,5 +50,11 @@ namespace PokemonReviewsApp.Repository
         {
             return dataContext.Owners.Any(o => o.Id == id);
         }
+
+        public bool UpdateOwner(Owner owner)
+        {
+            dataContext.Update(owner);
+            return Save();
+        }
     }
 }

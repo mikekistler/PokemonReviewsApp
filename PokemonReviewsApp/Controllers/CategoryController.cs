@@ -93,6 +93,38 @@ namespace PokemonReviewsApp.Controllers
             }
 
             return CreatedAtRoute("GetCategory", new { id = category.Id }, mapper.Map<CategoryDto>(category));
-        }   
+        }
+
+        [HttpPatch("{id}")]
+        [Consumes("application/merge-patch+json")]
+        [ProducesResponseType(200, Type = typeof(Category))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateCategory(int id, [FromBody] CategoryDto categoryUpdate)
+        {
+            if (categoryUpdate == null)
+                return BadRequest(ModelState);
+
+            if (categoryUpdate.Id == null)
+                categoryUpdate.Id = id;
+            else if (categoryUpdate.Id != id)
+                return BadRequest(ModelState);
+
+            if (!categoryRepository.CategoryExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var category = mapper.Map<Category>(categoryUpdate);
+
+            if (!categoryRepository.UpdateCategory(category))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating the category {category.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(mapper.Map<CategoryDto>(category));
+        }
     }
 }

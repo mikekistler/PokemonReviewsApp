@@ -51,5 +51,11 @@ namespace PokemonReviewsApp.Repository
         {
             return dataContext.Countries.ToList();
         }
+
+        public bool UpdateCountry(Country country)
+        {
+            dataContext.Update(country);
+            return Save();
+        }
     }
 }

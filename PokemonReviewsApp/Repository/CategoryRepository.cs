@@ -44,5 +44,11 @@ namespace PokemonReviewsApp.Repository
         {
             return dataContext.PokemonCategories.Where(c => c.CategoryId == id).Select(c => c.Pokemon).ToList();
         }
+
+        public bool UpdateCategory(Category category)
+        {
+            dataContext.Update(category);
+            return Save();
+        }
     }
 }

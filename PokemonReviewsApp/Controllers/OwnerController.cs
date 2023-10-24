@@ -114,5 +114,37 @@ namespace PokemonReviewsApp.Controllers
 
             return CreatedAtRoute("GetOwner", new { id = owner.Id }, mapper.Map<OwnerDto>(owner));
         }
+
+        [HttpPatch("{id}")]
+        [Consumes("application/merge-patch+json")]
+        [ProducesResponseType(200, Type = typeof(Owner))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateOwner(int id, [FromBody] OwnerDto ownerUpdate)
+        {
+            if (ownerUpdate == null)
+                return BadRequest(ModelState);
+
+            if (ownerUpdate.Id == null)
+                ownerUpdate.Id = id;
+            else if (ownerUpdate.Id != id)
+                return BadRequest(ModelState);
+
+            if (!ownerRepository.OwnerExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var owner = mapper.Map<Owner>(ownerUpdate);
+
+            if (!ownerRepository.UpdateOwner(owner))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating {owner.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(mapper.Map<OwnerDto>(owner));
+        }
     }
 }
