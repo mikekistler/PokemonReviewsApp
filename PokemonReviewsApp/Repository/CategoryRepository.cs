@@ -50,5 +50,11 @@ namespace PokemonReviewsApp.Repository
             dataContext.Update(category);
             return Save();
         }
+
+        public bool DeleteCategory(Category category)
+        {
+            dataContext.Remove(category);
+            return Save();
+        }
     }
 }

@@ -126,5 +126,34 @@ namespace PokemonReviewsApp.Controllers
 
             return Ok(mapper.Map<CategoryDto>(category));
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteCategory(int id)
+        {
+            var category = categoryRepository.GetCategory(id);
+
+            if (category == null)
+                return NotFound();
+
+            if (categoryRepository.ListPokemonInCategory(id).Count > 0)
+            {
+                ModelState.AddModelError("", $"Category {category.Name} cannot be deleted because it is used by at least one pokemon");
+                return StatusCode(409, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!categoryRepository.DeleteCategory(category))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the category {category.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
     }
 }

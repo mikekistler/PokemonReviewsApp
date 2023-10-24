@@ -125,5 +125,29 @@ namespace PokemonReviewsApp.Controllers
 
             return Ok(mapper.Map<ReviewerDto>(reviewer));
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteReviewer(int id)
+        {
+            var reviewer = reviewerRepository.GetReviewer(id);
+
+            if (reviewer == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!reviewerRepository.DeleteReviewer(reviewer))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the reviewer " +
+                                                                             $"{reviewer.FirstName} {reviewer.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
     }
 }

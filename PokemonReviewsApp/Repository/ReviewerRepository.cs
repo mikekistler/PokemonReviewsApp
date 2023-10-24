@@ -50,5 +50,11 @@ namespace PokemonReviewsApp.Repository
             dataContext.Update(reviewer);
             return Save();
         }
+
+        public bool DeleteReviewer(Reviewer reviewer)
+        {
+            dataContext.Remove(reviewer);
+            return Save();
+        }
     }
 }
