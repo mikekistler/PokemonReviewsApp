@@ -94,5 +94,34 @@ namespace PokemonReviewsApp.Controllers
 
             return CreatedAtRoute("GetPokemon", new { id = pokemon.Id }, mapper.Map<PokemonDto>(pokemon));
         }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(200, Type = typeof(Pokemon))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult ReplacePokemon(int id, [FromQuery] int ownerId, [FromQuery] int categoryId, [FromBody] PokemonDto pokemonUpdate)
+        {
+            if (pokemonUpdate == null)
+                return BadRequest(ModelState);
+
+            if (id != pokemonUpdate.Id)
+                return BadRequest(ModelState);
+
+            if (!pokemonRepository.PokemonExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var pokemon = mapper.Map<Pokemon>(pokemonUpdate);
+
+            if (!pokemonRepository.ReplacePokemon(ownerId, categoryId, pokemon))
+            {
+                ModelState.AddModelError("", $"Something went wrong replacing the pokemon {pokemon.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(mapper.Map<PokemonDto>(pokemon));
+        }
     }
 }

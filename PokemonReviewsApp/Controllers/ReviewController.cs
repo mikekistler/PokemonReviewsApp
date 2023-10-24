@@ -87,5 +87,34 @@ namespace PokemonReviewsApp.Controllers
 
             return CreatedAtRoute("GetReview", new { id = review.Id }, mapper.Map<ReviewDto>(review));
         }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(200, Type = typeof(Review))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult ReplaceReview(int id, [FromQuery] int reviewerId, [FromQuery] int pokemonId, [FromBody] ReviewDto reviewToReplace)
+        {
+            if (reviewToReplace == null)
+                return BadRequest(ModelState);
+
+            if (id != reviewToReplace.Id)
+                return BadRequest(ModelState);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!reviewRepository.ReviewExists(id))
+                return NotFound();
+
+            var review = mapper.Map<Review>(reviewToReplace);
+
+            if (!reviewRepository.ReplaceReview(reviewerId, pokemonId, review))
+            {
+                ModelState.AddModelError("", $"Something went wrong replacing the review");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(mapper.Map<ReviewDto>(review));
+        }
     }
 }

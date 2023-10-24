@@ -63,5 +63,20 @@ namespace PokemonReviewsApp.Repository
                 .Any(r => r.Reviewer.Id == reviewerId && r.Pokemon.Id == pokemonId);
 
         }
+
+        public bool ReplaceReview(int reviewerId, int pokemonId, Review review)
+        {
+            var reviewer = dataContext.Reviewers.Where(r => r.Id == reviewerId).FirstOrDefault();
+            var pokemon = dataContext.Pokemon.Where(p => p.Id == pokemonId).FirstOrDefault();
+
+            if (reviewer == null || pokemon == null)
+                return false;
+
+            review.Reviewer = reviewer;
+            review.Pokemon = pokemon;
+
+            dataContext.Update(review);
+            return Save();
+        }
     }
 }

@@ -95,5 +95,35 @@ namespace PokemonReviewsApp.Controllers
 
             return CreatedAtRoute("GetReviewer", new { id = reviewer.Id }, mapper.Map<ReviewerDto>(reviewer));
         }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(200, Type = typeof(Reviewer))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult ReplaceReviewer(int id, [FromBody] ReviewerDto reviewerUpdate)
+        {
+            if (reviewerUpdate == null)
+                return BadRequest(ModelState);
+
+            if (id != reviewerUpdate.Id)
+                return BadRequest(ModelState);
+
+            if (!reviewerRepository.ReviewerExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var reviewer = mapper.Map<Reviewer>(reviewerUpdate);
+
+            if (!reviewerRepository.ReplaceReviewer(reviewer))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating the reviewer " +
+                                                          $"{reviewer.FirstName} {reviewer.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(mapper.Map<ReviewerDto>(reviewer));
+        }
     }
 }
