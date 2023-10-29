@@ -37,7 +37,13 @@ namespace PokemonReviewsApp.Repository
 
         public Review GetReview(int id)
         {
-            return dataContext.Reviews.Where(r => r.Id == id).FirstOrDefault();
+            // This is the Fluent API way of doing this:
+            //return dataContext.Reviews.Where(r => r.Id == id).FirstOrDefault();
+
+            // This is the LINQ way of doing this:
+            return (Review)(from review in dataContext.Reviews
+                   where review.Id == id
+                     select review);
         }
 
         public ICollection<Review> GetReviewsForAPokemon(int pokemonId)
@@ -63,9 +69,13 @@ namespace PokemonReviewsApp.Repository
             //    .Any(r => r.Reviewer.Id == reviewerId && r.Pokemon.Id == pokemonId);
 
             // Here's how to do this without using Include():
-            return dataContext.Reviews
-                .Any(r => EF.Property<int>(r, "ReviewerId") == reviewerId
-                        && EF.Property<int>(r, "PokemonId") == pokemonId);
+            //return dataContext.Reviews
+            //    .Any(r => EF.Property<int>(r, "ReviewerId") == reviewerId
+            //            && EF.Property<int>(r, "PokemonId") == pokemonId);
+
+            // Here's how to do this with a raw SQL query:
+            var sql = "SELECT * FROM Reviews WHERE ReviewerId = {0} AND PokemonId = {1}";
+            return dataContext.Reviews.FromSqlRaw(sql, reviewerId, pokemonId).Any();
         }
 
         public bool ReplaceReview(int reviewerId, int pokemonId, Review review)
