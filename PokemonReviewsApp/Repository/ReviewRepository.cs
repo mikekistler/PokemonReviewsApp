@@ -57,11 +57,15 @@ namespace PokemonReviewsApp.Repository
 
         public bool ReviewExists(int reviewerId, int pokemonId)
         {
-            return dataContext.Reviews
-                .Include(r => r.Reviewer)
-                .Include(r => r.Pokemon)
-                .Any(r => r.Reviewer.Id == reviewerId && r.Pokemon.Id == pokemonId);
+            //return dataContext.Reviews
+            //    .Include(r => r.Reviewer)
+            //    .Include(r => r.Pokemon)
+            //    .Any(r => r.Reviewer.Id == reviewerId && r.Pokemon.Id == pokemonId);
 
+            // Here's how to do this without using Include():
+            return dataContext.Reviews
+                .Any(r => EF.Property<int>(r, "ReviewerId") == reviewerId
+                        && EF.Property<int>(r, "PokemonId") == pokemonId);
         }
 
         public bool ReplaceReview(int reviewerId, int pokemonId, Review review)
