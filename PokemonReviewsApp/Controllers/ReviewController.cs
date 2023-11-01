@@ -70,8 +70,15 @@ namespace PokemonReviewsApp.Controllers
 
             if (reviewRepository.ReviewExists(reviewerId, pokemonId))
             {
-                ModelState.AddModelError("", $"Review by reviewer {reviewerId} for Pokemon {pokemonId} already exists");
-                return StatusCode(422, ModelState);
+                var problem = new ProblemDetails()
+                {
+                    Type = HttpContext.Request.Path + "/ReviewAlreadyExists",
+                    Title = "Review already exists",
+                    Status = 422,
+                    Detail = $"Review by reviewer {reviewerId} for Pokemon {pokemonId} already exists",
+                    Instance = HttpContext.TraceIdentifier
+                };
+                return StatusCode(422, problem);
             }
 
             if (!ModelState.IsValid)
