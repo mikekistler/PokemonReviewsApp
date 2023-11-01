@@ -32,6 +32,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
+// Add problem details
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 if (args.Length == 1 && args[0].ToLower() == "seeddata")
